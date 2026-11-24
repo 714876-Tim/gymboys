@@ -2,6 +2,10 @@
 
 Persoonlijke website om gymtrainingen, schema en vooruitgang bij te houden.
 
+- Online: https://714876-tim.github.io/gym-log/ (GitHub Pages, repo `714876-Tim/gym-log`, branch `main`, map `/`). De repo is openbaar.
+- Update online zetten = commit + `git push` naar `main`; Pages bouwt vanzelf (± 1 min). Verhoog altijd `CACHE` in `sw.js`, anders blijven telefoons de oude versie tonen.
+- `website designs/` en `.claude/` staan in `.gitignore` en gaan niet online.
+
 - Gewone HTML/CSS/JS zonder build-stap: `index.html`, `style.css`, `app.js`. Openen = dubbelklik op `index.html`.
 - Grafieken via Chart.js 4.4.1 (CDN, jsdelivr).
 - Gegevens staan in `localStorage` onder de sleutel `gymsite.v1` (schedule, sessions, checkins). Verander het dataformaat niet zonder bestaande gegevens om te zetten.
