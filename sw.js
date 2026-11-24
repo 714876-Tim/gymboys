@@ -1,6 +1,6 @@
 // Offline support: keeps the app working in the gym without signal.
 // Bump CACHE when you change files, so phones pick up the new version.
-const CACHE = 'gym-log-v5';
+const CACHE = 'gymboys-v6';
 const ASSETS = [
   './',
   'index.html',

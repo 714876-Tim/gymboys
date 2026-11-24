@@ -2,7 +2,7 @@
 
 Persoonlijke website om gymtrainingen, schema en vooruitgang bij te houden.
 
-- Online: https://714876-tim.github.io/gym-log/ (GitHub Pages, repo `714876-Tim/gym-log`, branch `main`, map `/`). De repo is openbaar.
+- App-naam: **Gymboys**. Online: https://714876-tim.github.io/gymboys/ (GitHub Pages, repo `714876-Tim/gymboys`, branch `main`, map `/`). De repo is openbaar.
 - Update online zetten = commit + `git push` naar `main`; Pages bouwt vanzelf (± 1 min). Verhoog altijd `CACHE` in `sw.js`, anders blijven telefoons de oude versie tonen.
 - `website designs/` en `.claude/` staan in `.gitignore` en gaan niet online.
 

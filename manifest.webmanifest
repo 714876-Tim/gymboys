@@ -1,6 +1,6 @@
 {
-  "name": "Gym Log",
-  "short_name": "Gym Log",
+  "name": "Gymboys",
+  "short_name": "Gymboys",
   "description": "Track your gym plan, sets, reps, weights and progress.",
   "start_url": "./",
   "scope": "./",
