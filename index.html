@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gym Log">
+  <title>Gym Log</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=Lexend:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="bg3d.js" defer></script>
+</head>
+<body>
+  <!-- 3D liquid chrome (WebGL). The soft blobs are the fallback when 3D is not available. -->
+  <div class="liquid" aria-hidden="true">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+    <canvas id="bg3d"></canvas>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><span class="logo-dot"></span>Gym Log</div>
+    <button class="circle-btn" data-tab="settings" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section id="tab-today" class="tab active">
+      <div class="hero">
+        <div class="eyebrow"><span id="today-weekday">Today</span></div>
+        <h1 id="today-title" class="display">Workout</h1>
+      </div>
+      <div class="card controls">
+        <label>Date <input type="date" id="today-date"></label>
+        <label>Workout <select id="today-template"></select></label>
+        <span id="today-status" class="status"></span>
+      </div>
+      <div id="today-list"></div>
+      <div class="card add-row">
+        <input type="text" id="add-ex-name" placeholder="Add an exercise…" list="ex-names">
+        <button id="add-ex-btn" class="pill">+ Add</button>
+        <datalist id="ex-names"></datalist>
+      </div>
+      <div class="card">
+        <label class="block">Note (optional)
+          <textarea id="today-note" rows="2" placeholder="E.g. slept badly, shoulder felt stiff…"></textarea>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="save-session" class="btn-chrome">Save workout</button>
+        <button id="checkin-only" class="pill wide">Check in only (no details)</button>
+      </div>
+    </section>
+
+    <!-- PLAN -->
+    <section id="tab-plan" class="tab">
+      <div class="hero">
+        <div class="eyebrow">Weekly split</div>
+        <h1 class="display">The Plan</h1>
+      </div>
+      <p class="muted lead">Set the exercises for each day. A day without exercises is a rest day. Changes save automatically.</p>
+      <div id="plan-list" class="grid-days"></div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section id="tab-attendance" class="tab">
+      <div class="hero">
+        <div class="eyebrow">Consistency</div>
+        <h1 class="display">Show Up</h1>
+      </div>
+      <div id="stats" class="stats"></div>
+      <div class="card">
+        <h3>Last 16 weeks</h3>
+        <div class="heat-wrap">
+          <div class="heat-labels"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+          <div id="heatmap" class="heatmap"></div>
+        </div>
+        <div class="legend">
+          <span><i class="cell done"></i> trained</span>
+          <span><i class="cell missed"></i> planned, missed</span>
+          <span><i class="cell rest"></i> rest day</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Manual check-in</h3>
+        <p class="muted">Went to the gym but didn't log anything? Tick the day off here.</p>
+        <div class="add-row">
+          <input type="date" id="checkin-date">
+          <button id="checkin-btn" class="pill">Check in</button>
+        </div>
+        <ul id="checkin-list" class="plain"></ul>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="tab-progress" class="tab">
+      <div class="hero">
+        <div class="eyebrow">Strength</div>
+        <h1 class="display">Progress</h1>
+      </div>
+      <div class="segmented" id="progress-mode" role="tablist">
+        <button data-mode="workout" class="active">Per workout</button>
+        <button data-mode="exercise">Per exercise</button>
+      </div>
+
+      <div id="mode-workout">
+        <div class="chips" id="workout-chips"></div>
+        <div class="card">
+          <h3>Volume per session</h3>
+          <div id="workout-summary" class="stats small"></div>
+          <div class="chart-box"><canvas id="chart-workout"></canvas></div>
+          <p class="muted small">Volume = weight × reps, added up over every set of the workout. Higher means you did more work.</p>
+        </div>
+        <div class="card">
+          <h3>Exercises in this workout</h3>
+          <div id="workout-exercises" class="ex-list"></div>
+        </div>
+      </div>
+
+      <div id="mode-exercise" hidden>
+        <div class="chips" id="exercise-chips"></div>
+        <div class="card">
+          <h3 id="exercise-title">Exercise</h3>
+          <div id="progress-summary" class="stats small"></div>
+          <div class="chart-box"><canvas id="chart-ex"></canvas></div>
+          <p class="muted small">Estimated 1RM = the weight you could probably lift once (Epley formula). Useful for comparing progress when your reps vary.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Gym visits per week</h3>
+        <div class="chart-box"><canvas id="chart-visits"></canvas></div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="tab-history" class="tab">
+      <div class="hero">
+        <div class="eyebrow">Logbook</div>
+        <h1 class="display">History</h1>
+      </div>
+      <div id="history-list"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-settings" class="tab">
+      <div class="hero">
+        <div class="eyebrow">Data</div>
+        <h1 class="display">Settings</h1>
+      </div>
+      <div class="card">
+        <h3>Backup</h3>
+        <p class="muted">Your data is stored only in this browser on this device. Download a backup now and then so you never lose it. A backup also lets you move your data to another device.</p>
+        <div class="actions">
+          <button id="export-btn" class="pill wide">⬇ Download backup</button>
+          <label class="pill wide filebtn">⬆ Restore backup <input type="file" id="import-file" accept=".json,application/json" hidden></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Rest timer</h3>
+        <label class="toggle"><input type="checkbox" id="set-sound"><span>Sound when rest is over</span></label>
+        <label class="toggle"><input type="checkbox" id="set-vibrate"><span>Vibrate when rest is over (Android)</span></label>
+        <p class="muted small">The timer starts when you tick off a set. Tap −15 / +15 to change the rest for that exercise – the app remembers it. Default: 2:00 for presses, rows and pull-ups, 1:30 for everything else.</p>
+      </div>
+      <div class="card">
+        <h3>Install on your phone</h3>
+        <p class="muted"><b>iPhone (Safari):</b> tap Share, then “Add to Home Screen”.<br><b>Android (Chrome):</b> tap ⋮, then “Install app” or “Add to Home screen”.</p>
+      </div>
+      <div class="card">
+        <h3>Basic-Fit</h3>
+        <p class="muted">Basic-Fit has no public API for personal websites, so visits can't be imported automatically. Every saved workout counts as a visit, and “Check in only” logs a visit without details.</p>
+      </div>
+      <div class="card danger-zone">
+        <h3>Erase everything</h3>
+        <button id="reset-btn" class="pill danger">Delete all data</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabs">
+    <button data-tab="today" class="active" aria-label="Today" title="Today">
+      <svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg><span>Today</span>
+    </button>
+    <button data-tab="plan" aria-label="Plan" title="Plan">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Plan</span>
+    </button>
+    <button data-tab="attendance" aria-label="Attendance" title="Attendance">
+      <svg viewBox="0 0 24 24"><path d="M5 12.5l4 4 10-10"/></svg><span>Attend</span>
+    </button>
+    <button data-tab="progress" aria-label="Progress" title="Progress">
+      <svg viewBox="0 0 24 24"><path d="M6 20V11M12 20V5M18 20v-6"/></svg><span>Stats</span>
+    </button>
+    <button data-tab="history" aria-label="History" title="History">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>History</span>
+    </button>
+  </nav>
+
+  <div id="rest-timer" class="rest-timer" hidden role="timer" aria-live="polite">
+    <svg class="rt-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="rt-track" cx="22" cy="22" r="19"/><circle class="rt-prog" id="rt-prog" cx="22" cy="22" r="19"/></svg>
+    <div class="rt-info"><span class="rt-label" id="rt-label">Rest</span><span class="rt-time" id="rt-time">1:30</span></div>
+    <button class="rt-btn" data-rt="-15" aria-label="15 seconds less">−15</button>
+    <button class="rt-btn" data-rt="15" aria-label="15 seconds more">+15</button>
+    <button class="rt-btn rt-skip" data-rt="skip" aria-label="Stop timer">✕</button>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
